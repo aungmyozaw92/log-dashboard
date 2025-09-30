@@ -42,6 +42,7 @@ const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const LogList = () => {
+  const [msg, contextHolder] = message.useMessage();
   const [logs, setLogs] = useState([]);
   const [filteredLogs, setFilteredLogs] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -135,7 +136,7 @@ const LogList = () => {
       setFilteredLogs(items);
       setPagination({ current: page, pageSize, total });
     } catch (e) {
-      message.error("Failed to load logs");
+      msg.error("Failed to load logs");
       console.error(e);
     } finally {
       setLoading(false);
@@ -144,12 +145,12 @@ const LogList = () => {
 
   useEffect(() => {
     loadLogs(1, pagination.pageSize);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleRefresh = async () => {
     await loadLogs(pagination.current, pagination.pageSize);
-    message.success("Logs refreshed!");
+    msg.success("Logs refreshed!");
   };
 
   const handleExport = () => {
@@ -160,14 +161,14 @@ const LogList = () => {
         const end = filters.dateRange?.[1]?.format?.("YYYY-MM-DD");
         const jobId = await enqueueLogsExport({ start, end, severity: filters.severity, source: filters.source });
         if (!jobId) {
-          message.error("Failed to enqueue export");
+          msg.error("Failed to enqueue export");
           return;
         }
-        message.loading({ content: "Export enqueued. Preparing data...", key: "export", duration: 0 });
+        msg.loading({ content: "Export enqueued. Preparing data...", key: "export", duration: 0 });
         // poll status
         const poll = async (attempt = 0) => {
           if (attempt > 60) { // ~5 minutes if 5s interval
-            message.error({ content: "Export timed out", key: "export" });
+            msg.error({ content: "Export timed out", key: "export" });
             setExporting(false);
             return;
           }
@@ -175,21 +176,21 @@ const LogList = () => {
           if (status?.status === "finished") {
             const url = downloadExport(jobId);
             window.open(url, "_blank");
-            message.success({ content: "CSV ready. Download started.", key: "export" });
+            msg.success({ content: "CSV ready. Download started.", key: "export" });
             setExporting(false);
           } else if (status?.status === "failed") {
-            message.error({ content: "Export failed", key: "export" });
+            msg.error({ content: "Export failed", key: "export" });
             setExporting(false);
           } else {
             const text = status?.status === "started" ? "Export running..." : "Waiting for worker...";
-            message.loading({ content: text, key: "export", duration: 0 });
+            msg.loading({ content: text, key: "export", duration: 0 });
             setTimeout(() => poll(attempt + 1), 5000);
           }
         };
         poll();
       } catch (e) {
         console.error(e);
-        message.error({ content: "Failed to start export", key: "export" });
+        msg.error({ content: "Failed to start export", key: "export" });
       } finally {
         // exporting state will be reset on finish/fail/timeout
       }
@@ -299,15 +300,16 @@ const LogList = () => {
             onClick={async () => {
               try {
                 setLoading(true);
+                msg.loading({ key: "logDelete", content: "Deleting log...", duration: 0 });
                 const ok = await deleteLog(record.id);
                 if (ok) {
-                  message.success("Log deleted successfully");
+                  msg.success({ key: "logDelete", content: "Log deleted successfully" });
                   await loadLogs(pagination.current, pagination.pageSize);
                 } else {
-                  message.error("Failed to delete log");
+                  msg.error({ key: "logDelete", content: "Failed to delete log" });
                 }
               } catch (e) {
-                message.error("Failed to delete log");
+                msg.error({ key: "logDelete", content: "Failed to delete log" });
               } finally {
                 setLoading(false);
               }
@@ -322,6 +324,7 @@ const LogList = () => {
 
   return (
     <div>
+      {contextHolder}
       <PageHeader
         title="Log Management"
         subtitle="Monitor and analyze system logs"
@@ -525,12 +528,13 @@ const LogList = () => {
           try {
             const form = selectedLog ? editForm : createForm;
             const values = await form.validateFields();
+            msg.loading({ key: "logSave", content: selectedLog ? "Updating log..." : "Creating log...", duration: 0 });
             if (selectedLog) {
               await updateLog(selectedLog.id, values);
-              message.success("Log updated successfully");
+              msg.success({ key: "logSave", content: "Log updated successfully" });
             } else {
               await createLog(values);
-              message.success("Log created successfully");
+              msg.success({ key: "logSave", content: "Log created successfully" });
             }
             setIsEditModalVisible(false);
             setSelectedLog(null);
@@ -538,14 +542,14 @@ const LogList = () => {
             createForm.resetFields();
             loadLogs(pagination.current, pagination.pageSize);
           } catch (e) {
-            message.error("Failed to save log");
+            msg.error({ key: "logSave", content: "Failed to save log" });
           }
         }}
       >
         <Form layout="vertical" form={selectedLog ? editForm : createForm} initialValues={selectedLog || {}} preserve={false}>
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="severity" label="Severity" rules={[{ required: true }]}>
+              <Form.Item name="severity" label="Severity" rules={[{ required: true }]}> 
                 <Select placeholder="Select severity">
                   {SEVERITIES.map(s => (
                     <Option key={s} value={s}>{s}</Option>
@@ -554,7 +558,7 @@ const LogList = () => {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="source" label="Source" rules={[{ required: true }]}>
+              <Form.Item name="source" label="Source" rules={[{ required: true }]}> 
                 <Select placeholder="Select source">
                   {SOURCES.map(s => (
                     <Option key={s} value={s}>{s}</Option>
@@ -563,7 +567,7 @@ const LogList = () => {
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item name="message" label="Message" rules={[{ required: true }]}>
+          <Form.Item name="message" label="Message" rules={[{ required: true }]}> 
             <Input.TextArea rows={4} placeholder="Enter log message" />
           </Form.Item>
         </Form>

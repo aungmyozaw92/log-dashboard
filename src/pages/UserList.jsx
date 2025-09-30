@@ -16,6 +16,7 @@ const { Search } = Input;
 const { Option } = Select;
 
 const UserList = () => {
+  const [msg, contextHolder] = message.useMessage();
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -35,7 +36,7 @@ const UserList = () => {
       setUsers(list);
       setFilteredUsers(list);
     } catch (err) {
-      message.error("Failed to fetch users");
+      msg.error("Failed to fetch users");
       console.error(err);
     } finally {
       setLoading(false);
@@ -65,13 +66,14 @@ const UserList = () => {
     try {
       const values = await form.validateFields();
       setLoading(true);
-
+      const key = "userSave";
+      msg.loading({ key, content: editingUser ? "Updating user..." : "Creating user...", duration: 0 });
       if (editingUser) {
         await updateUser(editingUser.id, values);
-        message.success("User updated successfully!");
+        msg.success({ key, content: "User updated successfully!" });
       } else {
         await createUser(values);
-        message.success("User created successfully!");
+        msg.success({ key, content: "User created successfully!" });
       }
 
       setIsModalVisible(false);
@@ -79,7 +81,7 @@ const UserList = () => {
       fetchUsers(); // reload data
     } catch (error) {
       console.error(error);
-      message.error("Failed to save user");
+      msg.error({ key: "userSave", content: "Failed to save user" });
     } finally {
       setLoading(false);
     }
@@ -88,11 +90,13 @@ const UserList = () => {
   const handleDelete = async (userId) => {
     try {
       setLoading(true);
+      const key = "userDelete";
+      msg.loading({ key, content: "Deleting user...", duration: 0 });
       await deleteUser(userId);
-      message.success("User deleted successfully!");
+      msg.success({ key, content: "User deleted successfully!" });
       fetchUsers();
     } catch (error) {
-      message.error("Failed to delete user");
+      msg.error({ key: "userDelete", content: "Failed to delete user" });
     } finally {
       setLoading(false);
     }
@@ -169,6 +173,7 @@ const UserList = () => {
 
   return (
     <div>
+      {contextHolder}
       <PageHeader
         title="User Management"
         subtitle="Manage system users and their permissions"
@@ -218,7 +223,7 @@ const UserList = () => {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="name" label="Full Name" rules={[{ required: true }]}>
+              <Form.Item name="name" label="Full Name" rules={[{ required: true }]}> 
                 <Input placeholder="Enter full name" />
               </Form.Item>
             </Col>
@@ -228,7 +233,7 @@ const UserList = () => {
               <Input.Password placeholder="Enter password (min 8 chars)" />
             </Form.Item>
           )}
-          <Form.Item name="email" label="Email" rules={[{ required: true, type: "email" }]}>
+          <Form.Item name="email" label="Email" rules={[{ required: true, type: "email" }]}> 
             <Input placeholder="Enter email address" />
           </Form.Item>
           <Row gutter={16}>

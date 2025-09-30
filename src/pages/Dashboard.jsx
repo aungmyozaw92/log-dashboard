@@ -23,7 +23,7 @@ const { Option } = Select;
 
 const Dashboard = () => {
   // Filters state
-  const [range, setRange] = useState([dayjs().subtract(7, "day"), dayjs()]);
+  const [range, setRange] = useState([dayjs().startOf("month"), dayjs().endOf("month")]);
   const [severity, setSeverity] = useState();
   const [source, setSource] = useState();
   // Data state
@@ -130,7 +130,7 @@ const Dashboard = () => {
 
       {/* Statistics Cards */}
       <Row gutter={[16, 16]} style={{ marginBottom: "24px" }}>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={4}>
           <Card>
             <Statistic
               title="Total Logs"
@@ -140,7 +140,7 @@ const Dashboard = () => {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={4}>
           <Card>
             <Statistic
               title="Errors"
@@ -150,7 +150,7 @@ const Dashboard = () => {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={4}>
           <Card>
             <Statistic
               title="Info"
@@ -160,7 +160,7 @@ const Dashboard = () => {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={4}>
           <Card>
             <Statistic
               title="Warnings"
@@ -170,7 +170,7 @@ const Dashboard = () => {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={4}>
           <Card>
             <Statistic
               title="Debug"
