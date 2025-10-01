@@ -27,16 +27,16 @@ const AuthLayout = ({ children }) => {
   };
 
   const userMenuItems = [
-    {
-      key: "profile",
-      icon: <UserOutlined />,
-      label: "Profile",
-    },
-    {
-      key: "settings",
-      icon: <SettingOutlined />,
-      label: "Settings",
-    },
+    // {
+    //   key: "profile",
+    //   icon: <UserOutlined />,
+    //   label: "Profile",
+    // },
+    // {
+    //   key: "settings",
+    //   icon: <SettingOutlined />,
+    //   label: "Settings",
+    // },
     {
       type: "divider",
     },

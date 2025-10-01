@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   Table, 
   Card, 
@@ -59,6 +59,12 @@ const LogList = () => {
     dateRange: null
   });
   const [exporting, setExporting] = useState(false);
+  
+  // Refs for form controls
+  const searchRef = useRef(null);
+  const severityRef = useRef(null);
+  const sourceRef = useRef(null);
+  const dateRangeRef = useRef(null);
 
   const levelColors = {
     ERROR: "red",
@@ -363,6 +369,7 @@ const LogList = () => {
         <Row gutter={[16, 16]} style={{ marginBottom: "16px" }}>
           <Col xs={24} sm={8} md={6}>
             <Search
+              ref={searchRef}
               placeholder="Search logs..."
               allowClear
               onSearch={handleSearch}
@@ -371,8 +378,10 @@ const LogList = () => {
           </Col>
           <Col xs={24} sm={8} md={4}>
             <Select
+              ref={severityRef}
               placeholder="Severity"
               style={{ width: "100%" }}
+              value={filters.severity}
               onChange={handleLevelFilter}
               allowClear
             >
@@ -383,8 +392,10 @@ const LogList = () => {
           </Col>
           <Col xs={24} sm={8} md={4}>
             <Select
+              ref={sourceRef}
               placeholder="Source"
               style={{ width: "100%" }}
+              value={filters.source}
               onChange={handleSourceFilter}
               allowClear
             >
@@ -395,7 +406,9 @@ const LogList = () => {
           </Col>
           <Col xs={24} sm={12} md={6}>
             <RangePicker
+              ref={dateRangeRef}
               style={{ width: "100%" }}
+              value={filters.dateRange}
               onChange={handleDateRangeChange}
               placeholder={["Start Date", "End Date"]}
             />
@@ -406,6 +419,19 @@ const LogList = () => {
               onClick={() => {
                 setFilters({ search: "", severity: "", source: "", dateRange: null });
                 setFilteredLogs(logs);
+                // Clear form controls
+                if (searchRef.current) {
+                  searchRef.current.input.value = '';
+                }
+                if (severityRef.current) {
+                  severityRef.current.clear();
+                }
+                if (sourceRef.current) {
+                  sourceRef.current.clear();
+                }
+                if (dateRangeRef.current) {
+                  dateRangeRef.current.clear();
+                }
               }}
             >
               Clear Filters
